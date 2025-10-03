@@ -2,7 +2,7 @@ from flask_restful import Resource
 from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db
-from models.user import User
+from models import User
 from sqlalchemy.exc import SQLAlchemyError
 import bleach
 from datetime import datetime
@@ -40,7 +40,7 @@ class UserResource(Resource):
                 username = bleach.clean(data['username']),
                 phone = bleach.clean(data['phone']),
                 email = bleach.clean(data['email']),
-                created_at = datetime.timezone.eat.now()
+                created_at = datetime.utcnow()
             )
             new_user.password = data['password']
         except SQLAlchemyError as e:

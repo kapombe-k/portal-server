@@ -28,3 +28,19 @@ class TransactionsResource(Resource):
             "created_at": transaction.created_at.isoformat()
         } for transaction in transactions], 200
     
+    @jwt_required()
+    def transaction_details(self, transaction_id):
+        transaction = Transaction.query.get(transaction_id)
+        if not transaction:
+            return {"message": "Transaction not found"}, 404
+        
+        return {
+            "id": transaction.id,
+            "user_id": transaction.user_id,
+            "bundle_id": transaction.bundle_id,
+            "mpesa_code": transaction.mpesa_code,
+            "amount": str(transaction.amount),
+            "status": transaction.status,
+            "created_at": transaction.created_at.isoformat()
+        }, 200
+    

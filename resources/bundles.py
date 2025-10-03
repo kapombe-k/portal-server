@@ -2,14 +2,15 @@ from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 from models import db
-from models.bundles import Bundles
+from models import Bundle
 from sqlalchemy.exc import SQLAlchemyError
 import bleach
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
-class BundlesResource(Resource):
+class BundleResource(Resource):
     def get(self):
-        bundles = Bundles.query.all()
+        bundles = Bundle.query.all()
 
         return [{
             "id": bundle.id,
@@ -29,11 +30,11 @@ class BundlesResource(Resource):
                 return {'message': f'{field} is required'}, 400
         
         try:
-            new_bundle = Bundles (
+            new_bundle = Bundle (
                 name = bleach.clean(data['name']),
                 description = bleach.clean(data['description']),
                 price = data['price'],
-                created_at = datetime.timezone.eat.now()
+                created_at = datetime.now(ZoneInfo("Africa/Nairobi"))
             )
         except SQLAlchemyError as e:
             db.session.rollback()
@@ -47,7 +48,7 @@ class BundlesResource(Resource):
     @jwt_required()
     def patch(self, bundle_id):
         data = request.get_json()
-        bundle = Bundles.query.get(bundle_id)
+        bundle = Bundle.query.get(bundle_id)
         if not bundle:
             return {"message": "Bundle not found"}, 404
 
@@ -68,7 +69,7 @@ class BundlesResource(Resource):
     
     @jwt_required()
     def delete(self, bundle_id):
-        bundle = Bundles.query.get(bundle_id)
+        bundle = Bundle.query.get(bundle_id)
         if not bundle:
             return {"message": "Bundle not found"}, 404
         
