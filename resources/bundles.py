@@ -6,7 +6,6 @@ from models import Bundle
 from sqlalchemy.exc import SQLAlchemyError
 import bleach
 from datetime import datetime
-from zoneinfo import ZoneInfo
 
 class BundleResource(Resource):
     def get(self):
@@ -34,7 +33,7 @@ class BundleResource(Resource):
                 name = bleach.clean(data['name']),
                 description = bleach.clean(data['description']),
                 price = data['price'],
-                created_at = datetime.now(ZoneInfo("Africa/Nairobi"))
+                created_at = datetime.now()
             )
         except SQLAlchemyError as e:
             db.session.rollback()
@@ -81,5 +80,4 @@ class BundleResource(Resource):
             db.session.rollback()
             return {'message': 'Error deleting bundle', 'error': str(e)}, 500
 
-        return {"message": "Bundle deleted successfully"}, 200
-       
+        return {"message": "Bundle deleted successfully"}, 200     
