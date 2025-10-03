@@ -3,7 +3,6 @@ from sqlalchemy import MetaData, Numeric
 from sqlalchemy.orm import validates, relationship
 from sqlalchemy_serializer import SerializerMixin
 from datetime import datetime
-from zoneinfo import ZoneInfo
 from flask_bcrypt import generate_password_hash, check_password_hash
 import re
 
@@ -26,7 +25,7 @@ class User(db.Model):
     phone = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now(ZoneInfo("Africa/Nairobi")), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now(), nullable=False)
 
     # relationships
     transactions = db.relationship("Transaction", backref="user", lazy=True)
@@ -61,7 +60,7 @@ class Bundle(db.Model, SerializerMixin):
     data_amount = db.Column(db.String(50), nullable=False)  # e.g., "1 GB", "5 GB"
     duration = db.Column(db.String(50), nullable=False)
     price = db.Column(Numeric(10, 2), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now(ZoneInfo("Africa/Nairobi")), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now(), nullable=False)
 
     # relationships
     transactions = db.relationship("Transaction", backref="bundle", lazy=True)
@@ -80,7 +79,7 @@ class Transaction(db.Model):
     status = db.Column(db.String(50), nullable=False)  # e.g., 'pending', 'completed', 'failed'
     checkout_request_id = db.Column(db.String(100), nullable=True)
     transaction_date = db.Column(db.String(50), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.now(ZoneInfo("Africa/Nairobi")), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now(), nullable=False)
     session = db.relationship("Session", backref="transaction", uselist=False)
 
     def __repr__(self):
@@ -102,7 +101,7 @@ class Session(db.Model):
     transaction_id = db.Column(db.Integer, db.ForeignKey('transactions.id'), nullable=True)
     session_token = db.Column(db.String(255), unique=True, nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now(ZoneInfo("Africa/Nairobi")), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now(), nullable=False)
     expires_at = db.Column(db.DateTime, nullable=False)
 
     def __repr__(self):
@@ -116,7 +115,7 @@ class Admin(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     role = db.Column(db.String(50), default="SUPPORT")  # SUPERADMIN, MANAGER, SUPPORT
     password_hash = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now(ZoneInfo("Africa/Nairobi")), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now(), nullable=False)
 
     # relationships
     audit_logs = db.relationship("AuditLog", backref="admin", lazy=True)
@@ -133,7 +132,7 @@ class SupportTicket(db.Model):
     subject = db.Column(db.String(255), nullable=False)
     message = db.Column(db.Text, nullable=False)
     status = db.Column(db.String(50), default="OPEN")  # OPEN, IN_PROGRESS, RESOLVED, CLOSED
-    created_at = db.Column(db.DateTime, default=datetime.now(ZoneInfo("Africa/Nairobi")), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now(), nullable=False)
 
     # relationship
     user = db.relationship("User", backref="tickets")
@@ -150,7 +149,7 @@ class AuditLog(db.Model):
     action = db.Column(db.String(255), nullable=False)   # e.g. "CREATE_BUNDLE"
     entity = db.Column(db.String(100), nullable=False)   # e.g. "Bundle"
     entity_id = db.Column(db.Integer, nullable=True)     # Which record was affected
-    timestamp = db.Column(db.DateTime, default=datetime.now(ZoneInfo("Africa/Nairobi")), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.now(), nullable=False)
 
     def __repr__(self):
         return f"<AuditLog {self.action} - {self.entity} ({self.entity_id})>"
