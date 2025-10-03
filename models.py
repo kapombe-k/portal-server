@@ -89,6 +89,7 @@ class Session(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     bundle_id = db.Column(db.Integer, db.ForeignKey('bundles.id'), nullable=False)
     session_token = db.Column(db.String(255), unique=True, nullable=False)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.timezone.eat.now, nullable=False)
     expires_at = db.Column(db.DateTime, nullable=False)
 
