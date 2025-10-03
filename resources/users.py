@@ -19,6 +19,8 @@ class UserResource(Resource):
             "username": user.username,
             "phone": user.phone,
             "email": user.email,
+            "sessions": [session.id for session in user.sessions],
+            "transactions": [transaction.id for transaction in user.transactions],
             "created_at": user.created_at.isoformat()
         }, 200
 
