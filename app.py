@@ -1,6 +1,5 @@
 import os
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
@@ -9,6 +8,11 @@ from dotenv import load_dotenv
 from models import db
 from datetime import timedelta
 from flask_jwt_extended import JWTManager
+from resources.users import UserResource
+from resources.bundles import BundleResource
+from resources.sessions import SessionsResource
+from resources.transaction import TransactionsResource
+from resources.mpesa import MpesaResource, MpesaCallbackResource
 
 load_dotenv()
 
@@ -43,6 +47,14 @@ else:
     app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 app.config["JWT_ALGORITHM"] = "HS256"
 app.config["JWT_SECRET_KEY"] = os.environ.get("SECRET_KEY")
+
+# Add resources to API
+api.add_resource(UserResource, '/users', '/users/<int:user_id>')
+api.add_resource(BundleResource, '/bundles', '/bundles/<int:bundle_id>')
+api.add_resource(SessionsResource, '/sessions', '/sessions/<int:session_id>')
+api.add_resource(TransactionsResource, '/transactions', '/transactions/<int:transaction_id>')
+api.add_resource(MpesaResource, '/mpesa/stkpush')
+api.add_resource(MpesaCallbackResource, '/mpesa/callback')
 
 if __name__ == "__main__":
     app.run(debug=True)
