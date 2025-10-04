@@ -32,7 +32,7 @@ ENVIRONMENT = os.environ.get("ENVIRONMENT")
 if ENVIRONMENT == "production":
     DATABASE_URL = os.environ.get("SUPABASE_URL")
 else:
-    DATABASE_URL = "DATABASE_URL"
+    DATABASE_URL = os.environ.get("DATABASE_URL")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
