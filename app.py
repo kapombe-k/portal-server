@@ -19,14 +19,6 @@ load_dotenv()
 #FLASK APP INITIALIZATION
 app = Flask(__name__)
 
-#EXTENSIONS
-db.init_app(app)
-CORS(app)
-migrate = Migrate(app, db)
-bcrypt = Bcrypt(app)
-jwt = JWTManager(app)
-api = Api(app)
-
 # database configuration
 ENVIRONMENT = os.environ.get("ENVIRONMENT")
 if ENVIRONMENT == "production":
@@ -37,6 +29,14 @@ else:
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
+
+#EXTENSIONS
+db.init_app(app)
+CORS(app)
+migrate = Migrate(app, db)
+bcrypt = Bcrypt(app)
+jwt = JWTManager(app)
+api = Api(app)
 
 # JWT configuration
 if ENVIRONMENT == "production":
