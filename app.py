@@ -13,6 +13,7 @@ from resources.bundles import BundleResource
 from resources.sessions import SessionsResource
 from resources.transaction import TransactionsResource
 from resources.mpesa import MpesaResource, MpesaCallbackResource
+from resources.auth import SignUpResource, LoginResource
 
 load_dotenv()
 
@@ -32,7 +33,8 @@ app.config["SQLALCHEMY_ECHO"] = True
 
 #EXTENSIONS
 db.init_app(app)
-CORS(app)
+FRONTEND_URL = os.environ.get("FRONTEND_URL")
+CORS(app, origins=[FRONTEND_URL])
 migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
@@ -55,6 +57,8 @@ api.add_resource(SessionsResource, '/sessions', '/sessions/<int:session_id>')
 api.add_resource(TransactionsResource, '/transactions', '/transactions/<int:transaction_id>')
 api.add_resource(MpesaResource, '/mpesa/stkpush')
 api.add_resource(MpesaCallbackResource, '/mpesa/callback')
+api.add_resource(SignUpResource, '/auth/signup')
+api.add_resource(LoginResource, '/auth/login')
 
 if __name__ == "__main__":
     app.run(debug=True)

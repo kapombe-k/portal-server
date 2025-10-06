@@ -5,8 +5,6 @@ from models import db
 from models import User
 from sqlalchemy.exc import SQLAlchemyError
 import bleach
-from datetime import datetime
-
 class UserResource(Resource):
     @jwt_required()
     def get(self):
@@ -23,35 +21,7 @@ class UserResource(Resource):
             "transactions": [transaction.id for transaction in user.transactions],
             "created_at": user.created_at.isoformat()
         }, 200
-
-    def post(self):        
-        data = request.get_json()
-
-        if User.query.filter_by(phone=data.get('phone')).first():
-            return {'message': 'Phone number already in use'}, 400
-        
-        required_fields = ['username', 'phone', 'email', 'password']
-        for field in required_fields:
-            if field not in data:
-                return {'message': f'{field} is required'}, 400
-        
-        try:
-            new_user = User (
-                username = bleach.clean(data['username']),
-                phone = bleach.clean(data['phone']),
-                email = bleach.clean(data['email']),
-                created_at = datetime.utcnow()
-            )
-            new_user.password = data['password']
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            return {'message': 'Error creating user', 'error': str(e)}, 500
-
-        db.session.flush()
-        db.session.add(new_user)
-        db.session.commit()
-        return {"message": "User updated successfully"}, 200
-    
+       
     @jwt_required()
     def patch(self):
         

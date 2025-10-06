@@ -41,9 +41,15 @@ class User(db.Model):
                 raise ValueError("Invalid email address")
         return address
     
+    @validates('phone')
+    def validate_phone(self, key, phone):
+        if len(phone) != 10 or not phone.isdigit():
+            return ValueError("Phone number must be 10 digits")
+        return phone
+    
     @property
     def password(self):
-        raise AttributeError("password is not a readable attribute")
+        raise AttributeError("password is write-only")
 
     @password.setter
     def password(self, password):
@@ -51,6 +57,12 @@ class User(db.Model):
 
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    @staticmethod
+    def validate_password(password):
+        if len(password) < 8:
+            return False, "Password must be at least 8 characters"
+        return True, ""
     
 class Bundle(db.Model, SerializerMixin):
     __tablename__ = "bundles"
