@@ -4,7 +4,7 @@ import requests
 import base64
 import os
 from datetime import datetime, timezone
-from models import db, Transaction
+from models import db, Transaction, Bundle
 
 class MpesaResource(Resource):
     def get_access_token(self):
@@ -30,20 +30,31 @@ class MpesaResource(Resource):
         data = request.get_json()
 
         # Validate data
-        required = ['phone', 'amount', 'account_reference', 'transaction_id']
+        required = ['phone', 'amount', 'plan']
         for field in required:
             if field not in data:
                 return {'message': f'{field} is required'}, 400
 
         phone = self.normalize_phone(data['phone'])
         amount = data['amount']
-        account_reference = data['account_reference']
-        transaction_id = data['transaction_id']
+        plan = data['plan']
         transaction_desc = data.get('transaction_desc', "Payment for service")
 
-        transaction = Transaction.query.get(transaction_id)
-        if not transaction:
-            return {'message': 'Transaction not found'}, 404
+        # Find bundle
+        bundle = Bundle.query.filter_by(name=plan).first()
+        if not bundle:
+            return {'message': 'Bundle not found'}, 404
+
+        # Create transaction
+        transaction = Transaction(
+            user_id=None,  # For demo, no user
+            bundle_id=bundle.id,
+            amount=amount,
+            status='pending'
+        )
+        db.session.add(transaction)
+        db.session.flush()
+        account_reference = plan
 
         # Get access token
         access_token = self.get_access_token()

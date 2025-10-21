@@ -11,6 +11,7 @@ class TransactionsResource(Resource):
         return [{
             "id": transaction.id,
             "user_id": transaction.user_id,
+            "session_id": transaction.session.id if transaction.session else None,
             "amount": str(transaction.amount),
             "status": transaction.status,
             "created_at": transaction.created_at.isoformat()

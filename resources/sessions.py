@@ -25,6 +25,44 @@ class SessionsResource(Resource):
             return {'message': 'An error occurred while fetching sessions.', 'error': str(e)}, 500
         
     @jwt_required()
+    def get_session(self, session_id):
+        try:
+            session = Session.query.get(session_id)
+            if not session:
+                return {'message': 'Session not found'}, 404
+            session_data = {
+                'id': session.id,
+                'user_id': session.user_id,
+                'bundle_id': session.bundle_id,
+                'session_token': session.session_token,
+                'is_active': session.is_active,
+                'transaction_id': session.transaction_id,
+                'created_at': session.created_at.isoformat(),
+                'expires_at': session.expires_at.isoformat()
+            }
+            return {'session': session_data}, 200
+        except SQLAlchemyError as e:
+            return {'message': 'An error occurred while fetching the session.', 'error': str(e)}, 500
+        
+    @jwt_required()
+    def user_sessions(self, user_id):
+        try:
+            sessions = Session.query.filter_by(user_id=user_id).all()
+            sessions_list = [{
+                'id': session.id,
+                'user_id': session.user_id,
+                'bundle_id': session.bundle_id,
+                'session_token': session.session_token,
+                'is_active': session.is_active,
+                'transaction_id': session.transaction_id,
+                'created_at': session.created_at.isoformat(),
+                'expires_at': session.expires_at.isoformat()
+            } for session in sessions]
+            return {'sessions': sessions_list}, 200
+        except SQLAlchemyError as e:
+            return {'message': 'An error occurred while fetching user sessions.', 'error': str(e)}, 500
+        
+    @jwt_required()
     def start_session(self):
         data = request.get_json()
 

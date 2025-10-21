@@ -7,7 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 import bleach
 class UserResource(Resource):
     @jwt_required()
-    def get(self):
+    def get(self, user_id):
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
         if not user:
