@@ -14,6 +14,7 @@ from resources.sessions import SessionsResource
 from resources.transaction import TransactionsResource
 from resources.mpesa import MpesaResource, MpesaCallbackResource
 from resources.auth import SignUpResource, LoginResource
+from scheduler import start_scheduler
 
 load_dotenv()
 
@@ -51,14 +52,22 @@ app.config["JWT_ALGORITHM"] = "HS256"
 app.config["JWT_SECRET_KEY"] = os.environ.get("SECRET_KEY")
 
 # Add resources to API
-api.add_resource(UserResource, '/users', '/users/<int:user_id>')
+api.add_resource(
+    UserResource, "/users", "/users/<int:user_id>", "/users/<int:user_id>/transactions", "/users/<int:user_id>/sessions"
+)
 api.add_resource(BundleResource, '/bundles', '/bundles/<int:bundle_id>')
-api.add_resource(SessionsResource, '/sessions', '/sessions/<int:session_id>')
-api.add_resource(TransactionsResource, '/transactions', '/transactions/<int:transaction_id>')
+api.add_resource(SessionsResource, '/sessions', '/sessions/<int:session_id>', '/sessions/<int:user_id>/user_sessions')
+api.add_resource(
+    TransactionsResource,
+    "/transactions",
+    "/transactions/<int:transaction_id>",
+    "/<int:user_id>/transactions",
+)
 api.add_resource(MpesaResource, '/mpesa/stkpush')
 api.add_resource(MpesaCallbackResource, '/mpesa/callback')
 api.add_resource(SignUpResource, '/auth/signup')
 api.add_resource(LoginResource, '/auth/login')
 
 if __name__ == "__main__":
+    start_scheduler()
     app.run(debug=True)

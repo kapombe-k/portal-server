@@ -3,8 +3,9 @@ from flask import request
 import requests
 import base64
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from models import db, Transaction, Bundle
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 class MpesaResource(Resource):
     def get_access_token(self):
@@ -25,12 +26,13 @@ class MpesaResource(Resource):
             return phone[1:]
         return phone
 
+    @jwt_required()
     def post(self):
         # Initiate STK Push
         data = request.get_json()
 
         # Validate data
-        required = ['phone', 'amount', 'plan']
+        required = ['phone', 'amount', 'plan', 'mac_address', 'ip_address']
         for field in required:
             if field not in data:
                 return {'message': f'{field} is required'}, 400
@@ -38,6 +40,8 @@ class MpesaResource(Resource):
         phone = self.normalize_phone(data['phone'])
         amount = data['amount']
         plan = data['plan']
+        mac_address = data['mac_address']
+        ip_address = data['ip_address']
         transaction_desc = data.get('transaction_desc', "Payment for service")
 
         # Find bundle
@@ -45,12 +49,16 @@ class MpesaResource(Resource):
         if not bundle:
             return {'message': 'Bundle not found'}, 404
 
+        user_id = get_jwt_identity()
+
         # Create transaction
         transaction = Transaction(
-            user_id=None,  # For demo, no user
+            user_id=user_id,
             bundle_id=bundle.id,
             amount=amount,
-            status='pending'
+            status='pending',
+            mac_address=mac_address,
+            ip_address=ip_address
         )
         db.session.add(transaction)
         db.session.flush()
@@ -130,6 +138,23 @@ class MpesaCallbackResource(Resource):
             transaction.mpesa_code = mpesa_receipt_number
             transaction.status = 'completed'
             transaction.transaction_date = transaction_date
+
+            # Calculate expiry time based on bundle
+            bundle = Bundle.query.get(transaction.bundle_id)
+            # Assuming bundle.duration is in hours
+            duration_hours = int(bundle.duration.split()[0]) if bundle.duration else 24
+            transaction.expires_at = datetime.utcnow() + timedelta(hours=duration_hours)
+
+            # AUTHORIZE ON ROUTER
+            from resources.router import RouterManager
+            router = RouterManager()
+            comment = f"user:{transaction.user_id}|bundle:{bundle.name}|tx:{transaction.id}"
+            success = router.authorize_mac(transaction.mac_address, transaction.ip_address, comment)
+            router.disconnect()
+
+            if not success:
+                transaction.status = 'failed_authorization'
+
         else:
             # Failed
             transaction.status = 'failed'

@@ -92,6 +92,9 @@ class Transaction(db.Model):
     checkout_request_id = db.Column(db.String(100), nullable=True)
     transaction_date = db.Column(db.String(50), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.now(), nullable=False)
+    mac_address = db.Column(db.String(17), nullable=False)
+    ip_address = db.Column(db.String(15), nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=True)  # To track when access should end
     session = db.relationship("Session", backref="transaction", uselist=False)
 
     def __repr__(self):

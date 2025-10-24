@@ -16,6 +16,8 @@ python-dotenv = "*"
 bleach = "*"
 requests = "*"
 "backports.zoneinfo" = "*"
+routeros_api = "*"
+apscheduler = "*"
 
 [dev-packages]
 
