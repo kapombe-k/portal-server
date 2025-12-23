@@ -5,6 +5,7 @@ from models import db
 from models import User
 from sqlalchemy.exc import SQLAlchemyError
 import bleach
+
 class UserResource(Resource):
     @jwt_required()
     def get(self, user_id):
