@@ -34,8 +34,8 @@ app.config["SQLALCHEMY_ECHO"] = True
 
 #EXTENSIONS
 db.init_app(app)
-FRONTEND_URL = os.environ.get("FRONTEND_URL")
-CORS(app, origins=[FRONTEND_URL])
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+CORS(app, origins=[FRONTEND_URL, "http://localhost:5173"])
 migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
